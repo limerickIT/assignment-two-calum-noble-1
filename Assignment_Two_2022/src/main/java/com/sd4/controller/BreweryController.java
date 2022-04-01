@@ -9,15 +9,7 @@ import com.sd4.model.Brewery;
 import com.sd4.repository.BreweryRepository;
 import com.sd4.service.BreweryGeoService;
 import com.sd4.service.BreweryService;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Optional;
-import net.glxn.qrgen.core.image.ImageType;
-import net.glxn.qrgen.core.vcard.VCard;
-import net.glxn.qrgen.javase.QRCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,10 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequestMapping("/breweries")
@@ -47,38 +36,23 @@ public class BreweryController {
     @Autowired
     private BreweryRepository breweryRespository;
     
-    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-     public ModelAndView getAllBreweries(){
-         return new ModelAndView("/viewBrewerys", "brewerys", breweryService.findAll());
-     }
-    
-    @GetMapping("/breweries/{id}")
-    public ResponseEntity<Brewery> getOne(@PathVariable long id) {
-       Optional<Brewery> o =  breweryService.findOne(id);
-       
-       if (!o.isPresent()) 
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
-         else 
-            return ResponseEntity.ok(o.get());
-    }
-    
-    @GetMapping("/breweries/count")
+    @GetMapping("count")
     public long getCount() {
         return breweryService.count();
     }
-    @DeleteMapping("/breweries/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity delete(@PathVariable long id) {
         breweryService.deleteByID(id);
         return new ResponseEntity(HttpStatus.OK);
     }
     
-    @PostMapping("/breweries/")
+    @PostMapping("")
     public ResponseEntity add(@RequestBody Brewery a) {
         breweryService.saveBrewery(a);
         return new ResponseEntity(HttpStatus.CREATED);
     }
     
-    @PutMapping("/breweries/")
+    @PutMapping("")
     public ResponseEntity edit(@RequestBody Brewery a) { //the edit method should check if the Brewery object is already in the DB before attempting to save it.
         breweryService.saveBrewery(a);
         return new ResponseEntity(HttpStatus.OK);
@@ -150,6 +124,5 @@ public class BreweryController {
             "</html>";
                  }
             }
-     
- 
+
 }
