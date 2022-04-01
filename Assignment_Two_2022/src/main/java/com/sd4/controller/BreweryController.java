@@ -4,11 +4,17 @@
  */
 package com.sd4.controller;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.sd4.model.Breweries_Geocode;
 import com.sd4.model.Brewery;
 import com.sd4.repository.BreweryRepository;
 import com.sd4.service.BreweryGeoService;
 import com.sd4.service.BreweryService;
+import java.awt.image.BufferedImage;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,28 +41,6 @@ public class BreweryController {
     
     @Autowired
     private BreweryRepository breweryRespository;
-    
-    @GetMapping("count")
-    public long getCount() {
-        return breweryService.count();
-    }
-    @DeleteMapping("{id}")
-    public ResponseEntity delete(@PathVariable long id) {
-        breweryService.deleteByID(id);
-        return new ResponseEntity(HttpStatus.OK);
-    }
-    
-    @PostMapping("")
-    public ResponseEntity add(@RequestBody Brewery a) {
-        breweryService.saveBrewery(a);
-        return new ResponseEntity(HttpStatus.CREATED);
-    }
-    
-    @PutMapping("")
-    public ResponseEntity edit(@RequestBody Brewery a) { //the edit method should check if the Brewery object is already in the DB before attempting to save it.
-        breweryService.saveBrewery(a);
-        return new ResponseEntity(HttpStatus.OK);
-    }
     
     @GetMapping(value = "/map/{id}", produces = MediaType.TEXT_HTML_VALUE)
      public String breweryMap(@PathVariable long id){
@@ -125,4 +109,47 @@ public class BreweryController {
                  }
             }
 
+     @GetMapping(path = "/qrCode/{id}", produces = MediaType.IMAGE_PNG_VALUE)
+    public BufferedImage qrCode(@PathVariable long id) throws WriterException {
+        
+        Optional<Brewery> b = breweryService.findOne(id);
+        
+        String name = "";
+        String email = "";
+        String website = "";
+        String phone = "";
+        String address = "";
+        
+        if (!b.isPresent()) {
+            //return error
+        } else {
+            
+            name = b.get().getName();
+            email = b.get().getEmail();
+            phone = b.get().getPhone();
+            website = b.get().getWebsite();
+            
+            address = b.get().getName()+", "+b.get().getAddress1()+", "+b.get().getAddress2()+ ", "+b.get().getCity()+ ", "+b.get().getState()+ ", " +b.get().getCountry();
+            
+        }
+        
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("BEGIN:VCARD");
+        buffer.append("\nFN:").append(name);
+        buffer.append("\nADR:").append(address);
+        buffer.append("\nTEL:").append(phone);
+        buffer.append("\nURL:").append(website);
+        buffer.append("\nEMAIL:").append(email);
+        buffer.append("\nEND:VCARD");
+        
+        String qrCode = buffer.toString();
+        
+        QRCodeWriter wr = new QRCodeWriter();
+        
+        BitMatrix mtx = wr.encode(qrCode, BarcodeFormat.QR_CODE, 400, 400);
+        
+        
+        return MatrixToImageWriter.toBufferedImage(mtx);
+
+    }
 }
