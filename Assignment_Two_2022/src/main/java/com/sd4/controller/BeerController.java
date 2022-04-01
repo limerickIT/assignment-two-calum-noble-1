@@ -10,10 +10,16 @@ import com.sd4.service.BeerService;
 import com.sd4.service.BreweryService;
 import com.sd4.service.CategoryService;
 import com.sd4.service.StyleService;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.*;
 import org.springframework.http.HttpStatus;
@@ -28,6 +34,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
 @RequestMapping("/beers")
@@ -67,6 +74,18 @@ public class BeerController {
         beerService.saveBeer(a);
         return new ResponseEntity(HttpStatus.OK);
     }
+    
+    @GetMapping(value = "/{size}/{id}/", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<BufferedImage> getBeerImage(@PathVariable long id, @PathVariable String size) throws IOException {
+            
+        Optional<Beer> b = beerService.findOne(id);
+        
+        String path = "src/main/resources/static/assets/images/" + size + "/" + id + ".jpg";
+        BufferedImage img = ImageIO.read(new File(path));
+        
+        return ResponseEntity.ok(img);
+
+    }
   
     @GetMapping(value = "/listBeers", produces = MediaType.APPLICATION_JSON_VALUE)
     public CollectionModel<Beer> getAllBeers(){
@@ -90,7 +109,7 @@ public class BeerController {
     }
     
     @GetMapping(value = "/beerInfo/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-     public Map<String,String> beerInfo(@PathVariable long id){
+    public Map<String,String> beerInfo(@PathVariable long id){
          
          Optional<Beer> b = beerService.findOne(id);
          HashMap<String,String> map = new HashMap<>();
@@ -111,9 +130,9 @@ public class BeerController {
             map.put("Description: ", desc);
             map.put("Name: ", name);
             
-         }
+        }
          
-         return map;
+        return map;
      }
 
 }

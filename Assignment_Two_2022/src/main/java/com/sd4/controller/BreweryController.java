@@ -118,7 +118,7 @@ public class BreweryController {
         String email = "";
         String website = "";
         String phone = "";
-        String address = "";
+        String addressFull = "";
         
         if (!b.isPresent()) {
             //return error
@@ -129,14 +129,15 @@ public class BreweryController {
             phone = b.get().getPhone();
             website = b.get().getWebsite();
             
-            address = b.get().getName()+", "+b.get().getAddress1()+", "+b.get().getAddress2()+ ", "+b.get().getCity()+ ", "+b.get().getState()+ ", " +b.get().getCountry();
+            addressFull = b.get().getName()+", "+b.get().getAddress1()+", "+b.get().getAddress2()+ ", "+b.get().getCity()+ ", "+b.get().getState()+ ", " +b.get().getCountry();
             
         }
         
         StringBuffer buffer = new StringBuffer();
+        
         buffer.append("BEGIN:VCARD");
         buffer.append("\nFN:").append(name);
-        buffer.append("\nADR:").append(address);
+        buffer.append("\nADR:").append(addressFull);
         buffer.append("\nTEL:").append(phone);
         buffer.append("\nURL:").append(website);
         buffer.append("\nEMAIL:").append(email);
