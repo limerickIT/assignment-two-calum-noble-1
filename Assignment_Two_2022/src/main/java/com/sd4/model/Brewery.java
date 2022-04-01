@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.hateoas.Link;
 
 /**
  *
@@ -56,4 +57,8 @@ public class Brewery implements Serializable {
     
     private Double credit_limit;
     private String email;
+
+    public void add(Link beerLink) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

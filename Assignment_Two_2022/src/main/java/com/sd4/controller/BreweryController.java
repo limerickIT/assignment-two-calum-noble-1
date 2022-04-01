@@ -15,17 +15,15 @@ import com.sd4.repository.BreweryRepository;
 import com.sd4.service.BreweryGeoService;
 import com.sd4.service.BreweryService;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,28 +40,40 @@ public class BreweryController {
     @Autowired
     private BreweryRepository breweryRespository;
     
+    @GetMapping(value = "/listBreweries", produces = MediaType.APPLICATION_JSON_VALUE)
+    public CollectionModel<Brewery> getAllBreweries(){
+        
+        List<Brewery> aList = breweryService.findAll();
+        
+        Link link = linkTo(BeerController.class).withSelfRel();
+        
+        CollectionModel<Brewery> result = CollectionModel.of(aList, link);
+        
+        return result;
+    }
+    
     @GetMapping(value = "/map/{id}", produces = MediaType.TEXT_HTML_VALUE)
      public String breweryMap(@PathVariable long id){
          
-         Optional<Brewery> b = breweryService.findOne(id);
+         Optional<Brewery> br = breweryService.findOne(id);
          
-         if (!b.isPresent()){
+         if (!br.isPresent()){
             return "Error";
         }
         else{
-            Long breweryGeoID = b.get().getId();
-            String breweryName = b.get().getName();
-            String breweryAddress1 = b.get().getAddress1();
-            String breweryAddress2 = b.get().getAddress2();
-            String breweryCity = b.get().getCity();
-            String breweryState = b.get().getState();
+            Long breweryGeoID = br.get().getId();
+            String breweryName = br.get().getName();
+            String breweryAddress1 = br.get().getAddress1();
+            String breweryAddress2 = br.get().getAddress2();
+            String breweryCity = br.get().getCity();
+            String breweryState = br.get().getState();
             
             String fullAddress = breweryName + " " + breweryAddress1 + " " + breweryAddress2 + " " + breweryCity + " " + breweryState;
             
-            Optional<Breweries_Geocode> br = breweryGeoService.findOne(breweryGeoID);
+            Optional<Breweries_Geocode> brG = breweryGeoService.findOne(breweryGeoID);
             
-            Double breweryLatitude= br.get().getLatitude();
-            Double breweryLongitude = br.get().getLongitude();
+            Double breweryLatitude= brG.get().getLatitude();
+            Double breweryLongitude = brG.get().getLongitude();
            
             return "<!DOCTYPE html>"+
             "<html>"+
@@ -112,7 +122,7 @@ public class BreweryController {
      @GetMapping(path = "/qrCode/{id}", produces = MediaType.IMAGE_PNG_VALUE)
     public BufferedImage qrCode(@PathVariable long id) throws WriterException {
         
-        Optional<Brewery> b = breweryService.findOne(id);
+        Optional<Brewery> br = breweryService.findOne(id);
         
         String name = "";
         String email = "";
@@ -120,16 +130,16 @@ public class BreweryController {
         String phone = "";
         String addressFull = "";
         
-        if (!b.isPresent()) {
+        if (!br.isPresent()) {
             //return error
         } else {
             
-            name = b.get().getName();
-            email = b.get().getEmail();
-            phone = b.get().getPhone();
-            website = b.get().getWebsite();
+            name = br.get().getName();
+            email = br.get().getEmail();
+            phone = br.get().getPhone();
+            website = br.get().getWebsite();
             
-            addressFull = b.get().getName()+", "+b.get().getAddress1()+", "+b.get().getAddress2()+ ", "+b.get().getCity()+ ", "+b.get().getState()+ ", " +b.get().getCountry();
+            addressFull = br.get().getName()+", "+br.get().getAddress1()+", "+br.get().getAddress2()+ ", "+br.get().getCity()+ ", "+br.get().getState()+ ", " +br.get().getCountry();
             
         }
         
